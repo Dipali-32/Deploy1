@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pose Classification</title>
+    <style>
+        body {
+            display: flex;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        #sidebar {
+            width: 250px;
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-right: 2px solid #ccc;
+        }
+        .pose {
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 5px;
+            color: white;
+            background-color: red;
+        }
+        .pose.active {
+            background-color: green;
+        }
+        #main {
+            flex: 1;
+            text-align: center;
+        }
+        video, img {
+            width: 80%;
+            margin-top: 20px;
+            border: 2px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <h3>Pose Status</h3>
+        {% for label in labels %}
+        <div class="pose" id="{{ label|replace(' ', '_') }}">{{ label }}</div>
+        {% endfor %}
+    </div>
+    <div id="main">
+        <h1>Live Pose Detection</h1>
+        <img src="{{ url_for('video_feed') }}">
+    </div>
+
+    <script>
+        const source = new EventSource("/pose_updates");
+        source.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            for (const label in data) {
+                const id = label.replaceAll(' ', '_');
+                const el = document.getElementById(id);
+                if (el) {
+                    el.classList.toggle('active', data[label]);
+                }
+            }
+        };
+    </script>
+</body>
+</html>
