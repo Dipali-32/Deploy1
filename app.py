@@ -5,6 +5,7 @@ import tensorflow as tf
 import tensorflow_hub as hub
 import time
 import json
+import os
 
 app = Flask(__name__)
 
@@ -14,6 +15,7 @@ interpreter.allocate_tensors()
 input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
 
+# Pose classes
 class_labels = [
     "adho mukh svanasana",
     "ashtanga namaskara",
@@ -26,10 +28,11 @@ class_labels = [
 ]
 pose_status = {label: False for label in class_labels}
 
-# Load MoveNet
+# Load MoveNet model from TensorFlow Hub
 movenet = hub.load("https://tfhub.dev/google/movenet/singlepose/lightning/4")
 movenet = movenet.signatures['serving_default']
 
+# Pose landmark connections for drawing
 POSE_CONNECTIONS = [
     (0, 1), (1, 3), (0, 2), (2, 4), 
     (5, 7), (7, 9), (6, 8), (8, 10), 
@@ -112,5 +115,7 @@ def pose_updates():
             yield f"data: {json.dumps(pose_status)}\n\n"
     return Response(stream_with_context(event_stream()), content_type='text/event-stream')
 
+# Entry point for the app
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host='0.0.0.0', port=port, debug=True)
