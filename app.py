@@ -9,7 +9,7 @@ import json
 app = Flask(__name__)
 
 # Load model and labels
-model = tf.keras.models.load_model("cnn_normal_pose_classifier.h5")
+model = tf.keras.models.load_model("model.tflite")
 class_labels = [
     "adho mukh svanasana",
     "ashtanga namaskara",
